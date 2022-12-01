@@ -1,0 +1,15 @@
+[tool.poetry]
+name = "tool-tuesday"
+version = "0.1.0"
+description = ""
+authors = ["Dave Holst <daveholst@gmail.com>"]
+readme = "README.md"
+packages = [{include = "tool_tuesday"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
