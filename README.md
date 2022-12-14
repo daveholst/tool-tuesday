@@ -20,3 +20,4 @@ Basic python app that grabs the most recent track/song listings off wikipedia, p
 - [ ] Rewrite infra in python. Currently no m1 support for grpcio (dependency of pulumi via python). Due for release Jan 23'
 - [ ] ?Keep a record of previous results - dynamo table?
 - [ ] ?Add a live/tool-archives flag on requests?
+- [ ] Modules not working in lambda so slammed into one file. Might be time to do some learnings and fix this :shrug:
