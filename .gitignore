@@ -1,1 +1,5 @@
 .env
+dist
+package
+.DS_Store
+artifact.zip
