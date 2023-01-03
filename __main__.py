@@ -2,12 +2,12 @@
 
 import pulumi
 import pulumi_aws as aws
-import iam
+import infra.iam as iam
 import json
 
 region = aws.config.region
 
-custom_stage_name = "example"
+custom_stage_name = "dev"
 
 ##################
 ## Lambda Function
@@ -16,13 +16,14 @@ custom_stage_name = "example"
 # Create a Lambda function, using code from the `./app` folder.
 
 lambda_func = aws.lambda_.Function(
-    "mylambda",
+    "tool_tuesday_lambda",
     role=iam.lambda_role.arn,
-    runtime="python3.7",
-    handler="hello.handler",
-    code=pulumi.AssetArchive({".": pulumi.FileArchive("./hello_lambda")}),
+    runtime="python3.9",
+    handler="tool_tuesday/handler.handler",
+    code=pulumi.AssetArchive({".": pulumi.FileArchive("./infra/artifact.zip")}),
+    timeout=30,
+    memory_size=2048,
 )
-
 
 ####################################################################
 ##
@@ -116,7 +117,7 @@ http_route = aws.apigatewayv2.Route(
 )
 
 http_stage = aws.apigatewayv2.Stage(
-    "example-stage",
+    "dev-stage",
     api_id=http_endpoint.id,
     route_settings=[
         {
@@ -136,6 +137,42 @@ http_invoke_permission = aws.lambda_.Permission(
     principal="apigateway.amazonaws.com",
     source_arn=http_endpoint.execution_arn.apply(lambda arn: arn + "*/*"),
 )
+
+# get zone
+dh_wtf_domain_zone = aws.route53.get_zone(name="dh.wtf").zone_id
+
+# # route53 domain
+# dns_record = aws.route53
+
+# us_provider = aws.Provider("usProvider", region="us-east-2")
+
+
+tool_dh_wtf_cert_arn = "arn:aws:acm:ap-southeast-2:739766728346:certificate/c62c754f-5eb4-4ef4-b2f6-4cc93f4bafef"
+
+api_domain_name = aws.apigatewayv2.DomainName(
+    "exampleDomainName",
+    domain_name="tool.dh.wtf",
+    domain_name_configuration=aws.apigatewayv2.DomainNameDomainNameConfigurationArgs(
+        certificate_arn=tool_dh_wtf_cert_arn,
+        endpoint_type="REGIONAL",
+        security_policy="TLS_1_2",
+    ),
+    # opts=pulumi.ResourceOptions(provider=us_provider),
+)
+example_record = aws.route53.Record(
+    "exampleRecord",
+    name=api_domain_name.domain_name,
+    type="A",
+    zone_id=dh_wtf_domain_zone,
+    aliases=[
+        aws.route53.RecordAliasArgs(
+            name=api_domain_name.domain_name_configuration.target_domain_name,
+            zone_id=api_domain_name.domain_name_configuration.hosted_zone_id,
+            evaluate_target_health=False,
+        )
+    ],
+)
+
 
 # Export the https endpoint of the running Rest API
 pulumi.export(

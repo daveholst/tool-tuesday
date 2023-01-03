@@ -15,6 +15,17 @@ requests = "^2.28.1"
 beautifulsoup4 = "^4.11.1"
 
 
+[tool.poetry.dev-dependencies]
+pulumi = "^3.50.2"
+pulumi-aws = "^5.25.0"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.pyright]
+
+reportMissingImports = true
+reportShadowedImports = false
+
+pythonVersion = "3.9"
